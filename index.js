@@ -8,13 +8,11 @@ app.use(cors());
 app.use(express.static('dist'));
 
 app.use(express.json());
-morgan.token('type', function (req, res) {
+morgan.token('type', function (req) {
   return JSON.stringify(req.body);
 });
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :type'));
-
-let persons = [];
 
 app.get('/api/persons', (request, response, next) => {
   Person.find({})
@@ -54,14 +52,15 @@ app.delete('/api/persons/:id', (request, response, next) => {
 
   Person.findByIdAndDelete(id)
     .then(result => {
+      console.log(result);
       response.status(204).end();
     })
     .catch(error => next(error));
 });
-const generateId = () => {
-  const maxId = persons.length > 0 ? Math.max(...persons.map(person => person.id)) : 0;
-  return Math.floor(Math.random() * 1000);
-};
+//const generateId = () => {
+//const maxId = persons.length > 0 ? Math.max(...persons.map(person => person.id)) : 0;
+//return Math.floor(Math.random() * 1000);
+//};
 app.post('/api/persons', (request, response, next) => {
   const body = request.body;
 
@@ -101,7 +100,7 @@ app.put('/api/persons/:id', (request, response, next) => {
     })
     .catch(error => next(error));
 });
-const errorHandler = (error, request, response, next) => {
+const errorHandler = (error, request, response) => {
   console.error(error.message);
 
   if (error.name === 'CastError') {
